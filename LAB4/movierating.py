@@ -7,9 +7,17 @@ Original file is located at
     https://colab.research.google.com/drive/1QgHw0oEcOaOTbVwyVRRwbVlOneZwjFJB
 """
 
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import pandas as pd
-movies=pd.read_csv('IMDB-Movie-Data.csv')
+movies = pd.read_csv('IMDB-Movie-Data.csv')
 
 movies.head()
 
@@ -29,37 +37,33 @@ movies.dropna(inplace=True)
 
 movies.info()
 
-movies['Label']=movies['Rating']>=7
-movies['Label']=movies['Label'].astype(int)
+movies['Label'] = movies['Rating'] >= 7
+movies['Label'] = movies['Label'].astype(int)
 
 movies.head()
 
-movies=movies.drop(columns=['Rank','Description','Director'])
+movies = movies.drop(columns=['Rank', 'Description', 'Director'])
 
 movies.head()
 
 
-
-from sklearn.preprocessing import LabelEncoder
-le=LabelEncoder()
-movies['Label']=le.fit_transform(movies['Label'])
+le = LabelEncoder()
+movies['Label'] = le.fit_transform(movies['Label'])
 
 movies.head()
 
-movies=movies.drop(columns=['Title','Genre','Actors'])
+movies = movies.drop(columns=['Title', 'Genre', 'Actors'])
 
 movies.head()
 
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-plt.scatter(movies['Votes'],movies['Rating'])
+plt.scatter(movies['Votes'], movies['Rating'])
 
-plt.scatter(movies['Revenue (Millions)'],movies['Runtime (Minutes)'])
+plt.scatter(movies['Revenue (Millions)'], movies['Runtime (Minutes)'])
 
 movies.groupby('Year')['Rating'].mean().plot()
 
-movies_raw=pd.read_csv('IMDB-Movie-Data.csv')
+movies_raw = pd.read_csv('IMDB-Movie-Data.csv')
 
 movies_raw.head()
 
@@ -67,23 +71,22 @@ movies_raw.dropna(inplace=True)
 
 movies_raw.head()
 
-genre=movies_raw.copy()
-genre['Genre']=genre['Genre'].str.split(',')
-genre=genre.explode('Genre')
+genre = movies_raw.copy()
+genre['Genre'] = genre['Genre'].str.split(',')
+genre = genre.explode('Genre')
 
-from sklearn.model_selection import train_test_split
 
-x=movies[['Year','Runtime (Minutes)','Rating','Votes','Revenue (Millions)','Metascore']]
-y=movies['Label']
+x = movies[['Year', 'Runtime (Minutes)', 'Rating',
+            'Votes', 'Revenue (Millions)', 'Metascore']]
+y = movies['Label']
 
-x_train,x_test,y_train,y_test=train_test_split(
-    x,y,test_size=0.2,random_state=42,stratify=y
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.2, random_state=42, stratify=y
 )
 
 print(x_train.shape)
 print(x_test.shape)
 
-from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
 x_train_scaled = scaler.fit_transform(x_train)
@@ -95,13 +98,31 @@ x_test_scaled = scaler.transform(x_test)
 
 y_pred = model.predict(x_test_scaled)
 
-from sklearn.metrics import accuracy_score
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 
-from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_test, y_pred)
 print(cm)
 
-from sklearn.metrics import classification_report
 print(classification_report(y_test, y_pred))
+
+
+# Interpretaion and Insights
+
+# Feature Importance
+# Metascore & Votes most important
+# Genre moderately important
+# Revenue & Runtime less important
+
+
+# Data Patterns
+
+# High-rated movies cluster at high Metascore & Votes
+# Genre affects ratings
+# Revenue ≠ Rating
+
+# Model Performance
+# High accuracy
+# better prediction for high-rated
+# borderline
+# movies misclassified
